@@ -1,0 +1,11 @@
+--- a/relay-rust/src/main.rs
++++ b/relay-rust/src/main.rs
+@@ -325,7 +325,7 @@ impl Command for RelayCommand {
+ 
+ fn cmd_install(serial: Option<&str>) -> Result<(), CommandExecutionError> {
+     info!(target: TAG, "Installing gnirehtet client...");
+-    exec_adb(serial, vec!["install", "-r", "gnirehtet.apk"])
++    exec_adb(serial, vec!["install", "-r", "/usr/share/gnirehtet/gnirehtet.apk"])
+ }
+ 
+ fn cmd_uninstall(serial: Option<&str>) -> Result<(), CommandExecutionError> {

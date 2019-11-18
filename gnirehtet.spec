@@ -6,7 +6,7 @@
 %endif
 
 Name:           gnirehtet
-Version:        2.3
+Version:        2.4
 Release:        1%{?dist}
 Summary:        Gnirehtet provides reverse tethering for Android
 
@@ -57,7 +57,7 @@ popd
 
 %install
 pushd relay-rust
-%{__cargo} install %{__cargo_common_opts}
+%{__cargo} install --path . %{__cargo_common_opts}
 rm %{buildroot}%{_prefix}/.crates.toml
 popd
 
@@ -72,5 +72,8 @@ install -m644 %{name}.apk %{buildroot}%{_datadir}/%{name}
 %{_datadir}/%{name}/*
 
 %changelog
+* Mon Nov 18 2019 qvint <dotqvint@gmail.com> - 2.4-1
+- Update to 2.4
+
 * Mon Oct 14 2019 qvint <dotqvint@gmail.com> - 2.3-1
 - Initial release
