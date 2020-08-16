@@ -1,0 +1,11 @@
+--- a/relay-rust/src/main.rs
++++ b/relay-rust/src/main.rs
+@@ -50,7 +50,7 @@ fn get_apk_path() -> String {
+     if let Some(env_adb) = std::env::var_os("GNIREHTET_APK") {
+         env_adb.into_string().expect("invalid GNIREHTET_APK value")
+     } else {
+-        "gnirehtet.apk".to_string()
++        "/usr/share/gnirehtet/gnirehtet.apk".to_string()
+     }
+ }
+ 

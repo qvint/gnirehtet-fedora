@@ -1,30 +1,16 @@
-# Should be disabled in COPR, I guess.
-%bcond_with build_apk
-
-%if %{with build_apk}
-%{error:Not implemented yet}
-%endif
-
 Name:           gnirehtet
-Version:        2.4
-Release:        2%{?dist}
+Version:        2.5
+Release:        1%{?dist}
 Summary:        Gnirehtet provides reverse tethering for Android
-
-%global committish v%{version}
-%global has_official_apk 1
-
-%if !%{has_official_apk} && !%{with build_apk}
-%{error:This version of %{name} is not shipped with official prebuilt APK}
-%endif
 
 License:        ASL 2.0
 URL:            https://github.com/Genymobile/%{name}
 
+%global committish v%{version}
+
 Source0:        https://github.com/Genymobile/%{name}/archive/%{committish}/%{name}-%{committish}.tar.gz#/%{name}-%{version}.tar.gz
-Source1:        vendored-sources-%{version}.tar.gz
-%if !%{with build_apk}
-Source2:        https://github.com/Genymobile/%{name}/releases/download/%{committish}/%{name}-rust-linux64-%{committish}.zip
-%endif
+Source1:        https://github.com/Genymobile/%{name}/releases/download/%{committish}/%{name}-rust-linux64-%{committish}.zip
+Source2:        vendored-sources-%{version}.tar.gz
 Patch0:         %{name}-%{version}-paths.patch
 
 ExclusiveArch:  x86_64
@@ -37,18 +23,18 @@ use the internet connection of the computer they are plugged on. It does not
 require any root access (neither on the device nor on the computer).
 
 %prep
-%global cargo_registry %{_builddir}/%{name}-%{version}/vendored-sources
+%setup -qTn %{name}-rust-linux64 -b1
+%setup -qTn vendored-sources -b2
+%setup -qn %{name}-%{version}
 
-%autosetup -p1 -n %{name}-%{version}
-tar xf %{SOURCE1}
+%global cargo_registry %{_builddir}/vendored-sources
+%global prebuilt_root %{_builddir}/%{name}-rust-linux64
+
+%autopatch -p1
 
 pushd relay-rust
 %{cargo_prep}
 popd
-
-%if !%{with build_apk}
-unzip -p %{SOURCE2} %{name}-rust-linux64/%{name}.apk > %{name}.apk
-%endif
 
 %build
 pushd relay-rust
@@ -61,7 +47,7 @@ pushd relay-rust
 popd
 
 mkdir -p %{buildroot}%{_datadir}/%{name}
-install -m644 %{name}.apk %{buildroot}%{_datadir}/%{name}
+install -m644 %{prebuilt_root}/%{name}.apk %{buildroot}%{_datadir}/%{name}
 
 %files
 %license LICENSE
@@ -71,6 +57,10 @@ install -m644 %{name}.apk %{buildroot}%{_datadir}/%{name}
 %{_datadir}/%{name}/*
 
 %changelog
+* Sun Aug 16 2020 qvint <dotqvint@gmail.com> - 2.5-1
+- Update to 2.5
+- Clean up spec file
+
 * Sun May 03 2020 qvint <dotqvint@gmail.com> - 2.4-2
 - Use --no-track option for 'cargo install'
 
