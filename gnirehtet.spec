@@ -1,17 +1,17 @@
 Name:           gnirehtet
 Version:        2.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Gnirehtet provides reverse tethering for Android
 
 License:        ASL 2.0
-URL:            https://github.com/Genymobile/%{name}
+URL:            https://github.com/Genymobile/gnirehtet
 
 %global committish v%{version}
 
-Source0:        https://github.com/Genymobile/%{name}/archive/%{committish}/%{name}-%{committish}.tar.gz#/%{name}-%{version}.tar.gz
-Source1:        https://github.com/Genymobile/%{name}/releases/download/%{committish}/%{name}-rust-linux64-%{committish}.zip
+Source0:        https://github.com/Genymobile/gnirehtet/archive/%{committish}/gnirehtet-%{committish}.tar.gz#/gnirehtet-%{version}.tar.gz
+Source1:        https://github.com/Genymobile/gnirehtet/releases/download/%{committish}/gnirehtet-rust-linux64-%{committish}.zip
 Source2:        vendored-sources-%{version}.tar.gz
-Patch0:         %{name}-%{version}-paths.patch
+Patch0:         gnirehtet-%{version}-paths.patch
 
 ExclusiveArch:  x86_64
 BuildRequires:  rust-packaging
@@ -23,12 +23,12 @@ use the internet connection of the computer they are plugged on. It does not
 require any root access (neither on the device nor on the computer).
 
 %prep
-%setup -qTn %{name}-rust-linux64 -b1
+%setup -qTn gnirehtet-rust-linux64 -b1
 %setup -qTn vendored-sources -b2
-%setup -qn %{name}-%{version}
+%setup -qn gnirehtet-%{version}
 
 %global cargo_registry %{_builddir}/vendored-sources
-%global prebuilt_root %{_builddir}/%{name}-rust-linux64
+%global prebuilt_root %{_builddir}/gnirehtet-rust-linux64
 
 %autopatch -p1
 
@@ -46,17 +46,20 @@ pushd relay-rust
 %{__cargo} install --no-track --path . %{__cargo_common_opts}
 popd
 
-mkdir -p %{buildroot}%{_datadir}/%{name}
-install -m644 %{prebuilt_root}/%{name}.apk %{buildroot}%{_datadir}/%{name}
+mkdir -p %{buildroot}%{_datadir}/gnirehtet
+install -m644 %{prebuilt_root}/gnirehtet.apk %{buildroot}%{_datadir}/gnirehtet
 
 %files
 %license LICENSE
 %doc README.md
-%{_bindir}/%{name}
-%dir %{_datadir}/%{name}
-%{_datadir}/%{name}/*
+%{_bindir}/gnirehtet
+%dir %{_datadir}/gnirehtet
+%{_datadir}/gnirehtet/*
 
 %changelog
+* Sun Dec 27 2020 qvint <dotqvint@gmail.com> - 2.5-2
+- Expand %%{name}s
+
 * Sun Aug 16 2020 qvint <dotqvint@gmail.com> - 2.5-1
 - Update to 2.5
 - Clean up spec file

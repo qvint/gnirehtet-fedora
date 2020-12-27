@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+declare -r DNF=/usr/bin/dnf
+
+declare -r CARGO=/usr/bin/cargo       # cargo
+declare -r RPMBUILD=/usr/bin/rpmbuild # rpm-build
+declare -r RPMSPEC=/usr/bin/rpmspec   # rpm-build
+declare -r SPECTOOL=/usr/bin/spectool # rpmdevtools
+
+[[ "${EUID}" -ne 0 ]] || "${DNF}" --assumeyes install \
+  cargo rpm-build rpmdevtools
+
+declare -r spec=./gnirehtet.spec
+declare -r outdir="${1}"
+
+declare tempdir
+tempdir="$(mktemp --directory)"
+trap 'rm -rf "${tempdir}"' EXIT
+
+declare version gnirehtet_tgz vendored_sources_tgz
+version="$("${RPMSPEC}" --srpm --query --queryformat='%{VERSION}\n' "${spec}")"
+gnirehtet_tgz="gnirehtet-${version}.tar.gz"
+vendored_sources_tgz="vendored-sources-${version}.tar.gz"
+
+"${SPECTOOL}" --get-files "${spec}"
+
+# Make vendored-sources tarball.
+mkdir -p "${tempdir}/gnirehtet/vendored-sources"
+tar xf "${gnirehtet_tgz}" --strip-components=1 -C "${tempdir}/gnirehtet"
+pushd "${tempdir}/gnirehtet/relay-rust"
+"${CARGO}" vendor ../vendored-sources
+cd ..
+tar cf vendored-sources.tar.gz --owner=0 --group=0 vendored-sources
+popd
+mv "${tempdir}/gnirehtet/vendored-sources.tar.gz" "${vendored_sources_tgz}"
+
+"${RPMBUILD}" -bs "${spec}" \
+  --define "_topdir ${tempdir}" \
+  --define "_sourcedir ${PWD}" \
+  --define "_srcrpmdir ${outdir}"
